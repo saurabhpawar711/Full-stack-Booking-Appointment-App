@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+
+<style>
+    h1 {
+        text-align: center;
+        color: brown;
+    }
+
+    h4 {
+        text-align: center;
+        font: white;
+    }
+
+    body {
+        background: url("./hd-wallpaper-gab35dd611_1280.jpg")
+    }
+
+    .container {
+        margin: auto;
+        padding: 10px;
+        border: #04AA6D;
+        /* background: #5c3737; */
+    }
+
+    .box {
+        margin: 0px;
+        padding: 10px;
+        background: url("hd-wallpaper-g06af12d2d_1920.jpg");
+        border: #04AA6D;
+    }
+
+    form {
+        /* text-align: center; */
+        padding: 1.0%;
+        /* background: #cf6060; */
+    }
+
+    input[type="date"],
+    input[type="time"] {
+        width: 475px;
+        height: 30px;
+        border-radius: 6px;
+        background: rgb(241, 236, 236);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="number"] {
+        background: rgb(241, 236, 236);
+        width: 475px;
+        height: 30px;
+        border-radius: 6px;
+    }
+
+    input[type="submit"] {
+        color: aliceblue;
+        background: #0baf3c;
+        width: 390px;
+        height: 30px;
+        border-radius: 6px;
+        flex: content;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card mt-5">
+                    <div class="card-body">
+                        <div class="box">
+                            <h1 class="text-center text-danger mb-3">Book a call</h1>
+                            <h4 class="text-center mb-3">Our representative will call you within 1 hr of booked time
+                                slot.</h4>
+                            <hr>
+
+                            <form id="form" action="#" onsubmit="appointmentBook(event)">
+                                <div class="form-group">
+                                    <label><b>Name</b></label>
+                                    <input type="text" id="name" class="form-control" placeholder="Enter Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Email</b></label>
+                                    <input type="email" id="email" class="form-control"
+                                        placeholder="Enter valid mail ID" required>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Phone No.</b></label>
+                                    <input type="text" id="number" class="form-control"
+                                        placeholder="Enter valid phone number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Time for call</b></label>
+                                    <input type="date" class="form-control" id="date" required><input type="time"
+                                        id="time" class="form-control" required>
+                                </div>
+                                <div class="form-group text-center">
+                                    <input type="submit" class="btn btn-danger" value="Get a call">
+                                </div>
+                            </form>
+                            <ul id="list"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+        async function appointmentBook(event) {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const number = document.getElementById('number').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+
+            let obj = {
+                name: name,
+                email: email,
+                number: number,
+                date: date,
+                time: time
+            }
+
+            try {
+                const response = await axios.post('http://localhost:3000/user/add-user', obj)
+                console.log(response);
+                showUser(response.data.newUserDetails);
+            }
+            catch (err) {
+                document.body.innerHTML = document.body.innerHTML + '<h5>Something went wrong</h5>'
+                console.log(err.response);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/user/get-user')
+                // console.log(response)
+                for (let i = 0; i < response.data.allUsers.length; i++) {
+                    showUser(response.data.allUsers[i]);
+                }
+            }
+            catch (err) {
+                console.log(err);
+            }
+        })
+
+        function showUser(user) {
+            const userList = document.getElementById('list')
+            const childEle = document.createElement('li');
+            childEle.innerHTML = user.name + "-" + user.email + "-" + user.number + "-" + user.date + "-" + user.time;
+            const delBtn = document.createElement('button');
+            delBtn.innerHTML = 'delete'
+            delBtn.className = 'delbtn'
+
+            delBtn.onclick = function () {
+                deleteUser(user.id);
+            }
+
+            function deleteUser(userId) {
+                try {
+                    const deletedUser = axios.delete(`http://localhost:3000/user/delete-user/${userId}`)
+                    removeUserFromScreen(deletedUser)
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            }
+
+            function removeUserFromScreen(user) {
+                childEle.removeChild(delBtn);
+                userList.removeChild(childEle);
+            }
+            childEle.appendChild(delBtn);
+            userList.appendChild(childEle);
+
+        }
+    </script>
+
+</body>
+
+</html>
